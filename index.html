@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0" />
+  <title>Bocharov-Ilin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script>
+    /* preload Cinzel Decorative */
+    document.addEventListener('DOMContentLoaded', function() {
+      const logo = document.getElementById('splashLogo');
+      if (!logo) return;
+      const show = () => { logo.style.visibility = 'visible'; };
+      const t = setTimeout(show, 1500);
+      document.fonts.load("400 1em 'Cinzel Decorative'")
+        .then(function() { clearTimeout(t); show(); })
+        .catch(function() { clearTimeout(t); show(); });
+    });
+  </script>
+</head>
+<body>
+
+  <!-- триггер ранней загрузки шрифта -->
+  <span id="fontTrigger" style="font-family:'Cinzel Decorative',serif;position:absolute;visibility:hidden;font-size:0">A</span>
+  <div id="splash">
+  <video id="splashVideo" autoplay muted loop playsinline preload="auto"></video>
+  <span id="splashLogo">Bocharov-Ilin</span>
+  <img id="splashImg" alt="">
+</div>
+
+  <nav>
+    <div class="nav-left">
+      <button class="admin-btn" id="adminBtn" onclick="openAdmin()">admin</button>
+      <button class="nav-link" onclick="openCart()">cart <span class="nav-badge" id="cartBadge"></span></button>
+    </div>
+    <span class="nav-logo" onclick="goHome()">Bocharov-Ilin</span>
+    <div class="nav-right">
+      <div class="user-wrap">
+        <button class="nav-link" id="authBtn" onclick="toggleUserDD()">account</button>
+        <div class="user-dd" id="userDD">
+          <div class="user-dd-info">
+            <div class="user-dd-name"><span id="ddName"></span><span class="role-badge" id="ddRole"></span></div>
+            <div class="user-dd-email no-lower" id="ddEmail"></div>
+          </div>
+          <button class="user-dd-item" onclick="signOut()">sign out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page">
+    <div class="catalog-header">
+      <div class="cat-tabs">
+        <button class="cat-tab active" id="catAll"  onclick="catClick('all','catAll')">all</button>
+        <span class="cat-sep">/</span>
+        <button class="cat-tab" id="catTops"        onclick="catClick('tops','catTops')">tops</button>
+        <span class="cat-sep">/</span>
+        <button class="cat-tab" id="catBot"         onclick="catClick('bottoms','catBot')">bottoms</button>
+        <span class="cat-sep">/</span>
+        <button class="cat-tab" id="catAcc"         onclick="catClick('accessories','catAcc')">accessories</button>
+      </div>
+    </div>
+
+    <div class="catalog-body">
+      <div class="results-info" id="resultsInfo"></div>
+      <div class="product-grid" id="productGrid"></div>
+    </div>
+
+    <footer>
+      <div class="footer-links">
+        <button class="footer-link" onclick="openInfo('about')">about</button>
+        <button class="footer-link" onclick="openInfo('policy')">privacy policy</button>
+      </div>
+    </footer>
+  </div>
+
+  <!-- cart -->
+  <div class="cart-overlay" id="cartOverlay" onclick="overlayClick(event,'cartOverlay')">
+    <div class="cart-modal">
+      <div class="cart-head"><h3>cart</h3><button class="c-close" onclick="closeCart()">× close</button></div>
+      <div class="cart-body" id="cartBody"></div>
+      <div class="cart-foot" id="cartFoot"></div>
+    </div>
+  </div>
+
+  <!-- product modal -->
+  <div class="pm-overlay" id="pmOverlay" onclick="overlayClick(event,'pmOverlay')">
+    <div class="pm-modal">
+      <button class="pm-close" onclick="closePM()">× close</button>
+      <div class="pm-left">
+        <img id="pmImg" src="" alt="" />
+        <div class="pm-actions">
+          <button class="pm-add" id="pmAddBtn" onclick="pmAddToCart()">add to cart</button>
+          <div class="pm-qty-row" id="pmQtyRow" style="display:none">
+            <div class="pm-qty-ctrl">
+              <button class="pm-qbtn" onclick="pmChangeQty(-1)">&#8722;</button>
+              <div class="pm-qnum" id="pmQnum">1</div>
+              <button class="pm-qbtn" onclick="pmChangeQty(1)">&#43;</button>
+            </div>
+            <button class="pm-go" onclick="goToCart()">go to cart</button>
+          </div>
+        </div>
+      </div>
+      <div class="pm-right">
+        <div class="pm-name-price">
+          <div class="pm-name" id="pmName"></div>
+          <div class="pm-price" id="pmPrice"></div>
+        </div>
+        <div><div class="pm-sec">size</div><div class="pm-sizes" id="pmSizes"></div></div>
+        <div class="pm-desc" id="pmDesc"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- auth modal -->
+  <div class="modal-overlay" id="authOverlay" onclick="overlayClick(event,'authOverlay')">
+    <div class="modal">
+      <button class="modal-close" onclick="closeAuth()">× close</button>
+      <div class="modal-logo">
+        <div class="modal-logo-text">Bocharov-Ilin</div>
+        <div class="modal-subtitle">your personal account</div>
+      </div>
+      <div class="modal-tabs">
+        <button class="modal-tab active" id="tabLogin" onclick="switchTab('login')">sign in</button>
+        <button class="modal-tab"        id="tabReg"   onclick="switchTab('reg')">register</button>
+      </div>
+      <div id="authForm"></div>
+    </div>
+  </div>
+
+  <!-- admin panel -->
+  <div class="admin-overlay" id="adminOverlay" onclick="overlayClick(event,'adminOverlay')">
+    <div class="admin-modal">
+      <div class="admin-head">
+        <div class="admin-head-row"><h3>admin panel</h3><button class="c-close" onclick="closeAdmin()">× close</button></div>
+        <div class="admin-tabs-row">
+          <button class="admin-tab active" id="aTabProducts" onclick="adminTab('products')">products</button>
+          <button class="admin-tab"        id="aTabUsers"    onclick="adminTab('users')">users</button>
+          <button class="admin-tab"        id="aTabOrders"   onclick="adminTab('orders')">orders</button>
+        </div>
+      </div>
+      <div class="admin-body" id="adminBody"></div>
+    </div>
+  </div>
+
+  <!-- info modal -->
+  <div class="info-overlay" id="infoOverlay" onclick="overlayClick(event,'infoOverlay')">
+    <div class="info-modal">
+      <button class="pm-close" onclick="closeInfo()">× close</button>
+      <div class="info-title" id="infoTitle"></div>
+      <div class="info-body"  id="infoBody"></div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+  <script src="script.js"></script>
+
+  <!-- order success modal -->
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-modal">
+      <div class="success-check">✓</div>
+      <div class="success-title">order placed!</div>
+      <div class="success-body" id="successBody"></div>
+      <button class="success-btn" onclick="closeSuccess()">continue shopping</button>
+    </div>
+  </div>
+</body>
+</html>
